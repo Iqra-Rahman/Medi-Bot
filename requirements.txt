@@ -1,10 +1,8 @@
-flask
-fitz
-flask
+Flask
+PyMuPDF
 langchain
 langchain-openai
-azure-ai-ml # Required for some Azure functionalities
+azure-ai-ml
 openai
 python-dotenv
-PyMuPDF
 gunicorn
