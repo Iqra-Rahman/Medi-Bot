@@ -171,7 +171,10 @@ def reschedule_appointment(appointment_id):
     conn.close()
     return jsonify({"status": "success", "message": "Appointment rescheduled successfully!"})
 
-# if __name__ == '__main__': 
-    # vercel 
+# Run the Flask app
+if __name__ == '__main__':
     init_db()
-    # app.run(debug=True)   
+    app.run(debug=True)
+else:
+    # This runs when deployed (via gunicorn)
+    init_db()   
