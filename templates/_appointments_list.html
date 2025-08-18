@@ -1,0 +1,32 @@
+<!-- templates/_appointments_list.html -->
+{% for appointment in appointments %}
+<li class="appointment-item status-{{ appointment['status'].lower() }}" data-id="{{ appointment['id'] }}">
+    <div class="appointment-details">
+        <span class="patient-name">{{ appointment['patient_name'] }}</span>
+        <span class="patient-info">
+            <i class="fas fa-user"></i> {{ appointment['patient_age'] }} yrs, {{ appointment['patient_gender'] }}
+        </span>
+        <span class="appointment-datetime">
+            <i class="fas fa-calendar-alt"></i> {{ appointment['appointment_date'] }}
+            <i class="fas fa-clock"></i> {{ appointment['appointment_time'] }}
+        </span>
+        <span class="appointment-department">
+            <i class="fas fa-stethoscope"></i> {{ appointment['department'] }}
+        </span>
+        <span class="appointment-status status-{{ appointment['status'].lower() }}">
+            {{ appointment['status'] }}
+        </span>
+    </div>
+    <div class="appointment-actions">
+        {% if appointment['status'] != 'Cancelled' %}
+        <button class="action-btn reschedule-btn" data-id="{{ appointment['id'] }}">Reschedule</button>
+        <button class="action-btn cancel-btn" data-id="{{ appointment['id'] }}">Cancel</button>
+        {% endif %}
+    </div>
+</li>
+{% else %}
+<div class="empty-state">
+    <i class="fa-regular fa-calendar-xmark"></i>
+    <p>No appointments found.</p>
+</div>
+{% endfor %}

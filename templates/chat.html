@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediEase Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #008080; --light-primary: #e6f4f4; --dark-primary: #006666;
+            --secondary-color: #5a6d7a; --accent-color: #fec84b; --bg-color: #f9fbfd;
+            --sidebar-bg: #ffffff; --chat-bg: #ffffff; --user-msg-bg: #008080;
+            --bot-msg-bg: #f1f3f5; --border-color: #e9ecef; --success-color: #12b76a;
+            --error-color: #d92d20; --text-primary: #101828; --text-secondary: #344054;
+        }
+        body { font-family: 'Nunito Sans', sans-serif; background-color: var(--bg-color); margin: 0; color: var(--text-secondary); }
+        .main-container { display: flex; height: 100vh; }
+        .sidebar { width: 420px; background-color: var(--sidebar-bg); padding: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); overflow: hidden; }
+        .sidebar-header { padding: 28px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .sidebar-header h2 { font-weight: 700; color: var(--primary-color); margin: 0 0 0 12px; font-size: 1.8rem; }
+        .sidebar-nav { display: flex; gap: 10px; padding: 16px 28px; background-color: #f8f9fa; border-bottom: 1px solid var(--border-color); }
+        .nav-btn { flex-grow: 1; font-weight: 600; padding: 10px; border-radius: 8px; transition: all 0.2s ease-in-out; cursor: pointer; border: 1px solid #d0d5dd; background-color: #fff; }
+        .nav-btn.active { background-color: var(--light-primary); color: var(--primary-color); border-color: var(--primary-color); }
+        .nav-btn:not(.active):hover { background-color: #f9fafb; }
+        .view-content { padding: 28px; overflow-y: auto; flex-grow: 1; }
+        .view-pane { display: none; } .view-pane.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .form-section h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: var(--primary-color); }
+        #appointment-form fieldset { border: none; padding: 0; margin: 0; }
+        #appointment-form .form-control, #appointment-form .form-select { width: 100%; box-sizing: border-box; margin-bottom: 14px; padding: 10px 12px; border-radius: 8px; border: 1px solid #d0d5dd; background-color: #fff; }
+        #appointment-form .form-control:focus, #appointment-form .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--light-primary); }
+        .form-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { width: 100%; font-weight: 600; padding: 12px; border-radius: 8px; transition: all 0.2s ease-in-out; cursor: pointer; border: 1px solid transparent; }
+        .btn-primary { background-color: var(--primary-color); color: white; } .btn-primary:hover { background-color: var(--dark-primary); }
+        .btn-warning { background-color: #f79009; color: white; } .btn-warning:hover { background-color: #dc6803; }
+        .btn-secondary { background-color: #fff; color: var(--text-secondary); border-color: #d0d5dd; } .btn-secondary:hover { background-color: #f9fafb; }
+        #cancel-edit-btn { display: none; }
+        .btn.btn-loading .spinner { display: inline-block; } .btn .spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+        .btn.btn-loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .recent-appointments h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+        #appointments-list { list-style: none; padding: 0; }
+        .appointment-item { background-color: #fff; border: 1px solid var(--border-color); border-left: 5px solid; padding: 16px; border-radius: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
+        .appointment-item:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(17,24,39,0.08); }
+        .appointment-item.is-editing { box-shadow: 0 0 0 3px var(--accent-color); border-color: var(--accent-color); }
+        .appointment-details { display: flex; flex-direction: column; gap: 6px; }
+        .patient-name { font-weight: 700; font-size: 1.1em; color: var(--text-primary); }
+        .patient-info, .appointment-datetime, .appointment-department { font-size: 0.9em; color: var(--secondary-color); display: flex; align-items: center; }
+        .patient-info i, .appointment-datetime i, .appointment-department i { margin-right: 8px; width: 16px; text-align: center; color: #98a2b3; }
+        .appointment-status { font-size: 0.8em; font-weight: 600; padding: 4px 10px; border-radius: 16px; margin-top: 8px; width: fit-content; }
+        .status-scheduled { background-color: #ecfdf3; color: #027a48; } .appointment-item.status-scheduled { border-left-color: var(--success-color); }
+        .status-rescheduled { background-color: #fffaeb; color: #b54708; } .appointment-item.status-rescheduled { border-left-color: var(--accent-color); }
+        .status-cancelled { background-color: #fef3f2; color: #b42318; } .appointment-item.status-cancelled { border-left-color: var(--error-color); opacity: 0.7; }
+        .appointment-actions { text-align: right; }
+        .action-btn { font-size: 0.85em; font-weight: 600; padding: 6px 12px; margin-top: 8px; border-radius: 6px; border: 1px solid; background: none; cursor: pointer; transition: all 0.2s ease; }
+        .action-btn.reschedule-btn { border-color: #fedf89; color: #b54708; } .action-btn.reschedule-btn:hover { background-color: #fffaeb; }
+        .action-btn.cancel-btn { border-color: #fecdca; color: #b42318; } .action-btn.cancel-btn:hover { background-color: #fef3f2; }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--secondary-color); }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; color: #d0d5dd; } .empty-state p { font-size: 1.1rem; font-weight: 600; }
+        #toast { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 100; right: 30px; bottom: 30px; font-size: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        #toast.toast-show { visibility: visible; animation: toast-fadein 0.5s, toast-fadeout 0.5s 2.5s; }
+        #toast.toast-success { background-color: var(--success-color); } #toast.toast-error { background-color: var(--error-color); }
+        @keyframes toast-fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } } @keyframes toast-fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; padding: 24px; height: 100vh; }
+        .chat-container { flex-grow: 1; display: flex; flex-direction: column; background: var(--chat-bg); border-radius: 16px; box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05); overflow: hidden; }
+        .chat-header { padding: 20px; background: linear-gradient(135deg, #008080, #009688); color: white; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; }
+        .chat-header i { margin-right: 12px; }
+        #chat-window { flex-grow: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; }
+        .message { max-width: 75%; margin-bottom: 16px; padding: 12px 18px; border-radius: 20px; word-wrap: break-word; line-height: 1.5; }
+        .message-user { background-color: var(--user-msg-bg); color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
+        .message-bot { background-color: var(--bot-msg-bg); color: var(--text-secondary); align-self: flex-start; border-bottom-left-radius: 5px; }
+        .message-bot ul { padding-left: 20px; margin-top: 10px; margin-bottom: 0; }
+        .chat-input-area { padding: 20px; border-top: 1px solid var(--border-color); background-color: #f8f9fa; }
+        .input-group { display: flex; }
+        #user-input { border: 1px solid var(--border-color); border-radius: 25px; padding: 10px 20px; flex-grow: 1; transition: border-color 0.2s; }
+        #user-input:focus { outline: none; border-color: var(--primary-color); }
+        #send-btn { border-radius: 50%; width: 48px; height: 48px; margin-left: 10px; background-color: var(--primary-color); border: none; flex-shrink: 0; }
+        #send-btn:hover { background-color: var(--dark-primary); }
+        
+        /* ## NEW: Footer Styling ## */
+        .sidebar-footer {
+            padding: 20px 28px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            border-top: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+        }
+        .sidebar-footer strong {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="main-container">
+    <div class="sidebar">
+        <div class="sidebar-header"> <i class="fa-solid fa-staff-snake fa-2x" style="color: var(--primary-color);"></i> <h2>MediEase</h2> </div>
+        <div class="sidebar-nav">
+            <button id="book-view-btn" class="nav-btn active" data-view="book-view">Book Appointment</button>
+            <button id="appointments-view-btn" class="nav-btn" data-view="appointments-view">View Appointments</button>
+        </div>
+        <div class="view-content">
+            <div id="book-view" class="view-pane active">
+                <div class="form-section">
+                    <form id="appointment-form">
+                        <fieldset>
+                            <h3 id="form-title">Book an Appointment</h3>
+                            <input type="hidden" id="appointment-id">
+                            <input type="text" id="patient-name" class="form-control" placeholder="Full Name" required>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="patient-age" class="form-control" placeholder="Age" required min="0">
+                                <select id="patient-gender" class="form-select" required> <option value="" disabled selected>Gender</option> <option value="Male">Male</option> <option value="Female">Female</option> <option value="Other">Other</option> </select>
+                            </div>
+                            <input type="tel" id="patient-contact" class="form-control" placeholder="Contact Number" required>
+                            <input type="text" id="appointment-department" class="form-control" placeholder="Medical Department" required>
+                            <input type="date" id="appointment-date" class="form-control" required>
+                            <input type="time" id="appointment-time" class="form-control" required>
+                            <div class="form-buttons">
+                                <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" id="form-submit-btn" class="btn btn-primary"> <span class="spinner"></span> <span class="btn-text"><i class="fas fa-check"></i> Confirm Booking</span> </button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            <div id="appointments-view" class="view-pane">
+                 <div class="recent-appointments">
+                    <h3>Recent Appointments</h3>
+                    <ul id="appointments-list"> {% include '_appointments_list.html' %} </ul>
+                </div>
+            </div>
+        </div>
+        <!-- ## NEW: Sidebar Footer ## -->
+        <div class="sidebar-footer">
+            © 2024 <strong>Iqra Rahman.</strong> All Rights Reserved.
+        </div>
+    </div>
+    <div class="chat-area">
+        <div class="chat-container">
+            <div class="chat-header"><i class="fas fa-robot"></i> MediEase Assistant</div>
+            <div id="chat-window"> <div class="message message-bot"> Hello! Welcome to MediEase. <ul> <li>Use the <b>Book Appointment</b> tab to create or edit appointments.</li> <li>Use the <b>View Appointments</b> tab to see your schedule.</li> <li>Feel free to ask me any questions!</li> </ul> </div> </div>
+            <div class="chat-input-area"> <div class="input-group"> <input type="text" id="user-input" class="form-control" placeholder="Ask a question..."> <button id="send-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button> </div> </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

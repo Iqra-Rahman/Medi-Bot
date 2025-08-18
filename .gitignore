@@ -1,0 +1,6 @@
+__pycache__/
+.env
+Sunrise Medical Center - AI-Powered Chatbot & Hospital Information.pdf
+venv/
+*.db
+help.txt

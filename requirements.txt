@@ -1,0 +1,10 @@
+flask
+fitz
+flask
+langchain
+langchain-openai
+azure-ai-ml # Required for some Azure functionalities
+openai
+python-dotenv
+PyMuPDF
+gunicorn
