@@ -166,7 +166,7 @@ def reschedule_appointment(appointment_id):
     conn.close()
     return jsonify({"status": "success", "message": "Appointment rescheduled successfully!"})
 
-# if __name__ == '__main__': --
-    # vercel endpoint
+if __name__ == '__main__': 
+    # vercel 
     init_db()
-    # app.run(debug=True)   --
+    app.run(debug=True)   
