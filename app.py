@@ -3,9 +3,14 @@ import sqlite3
 import traceback
 from workflow import chat_agent
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.static_folder = 'static'
+
+# Base directory for database
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "healthcare_bot.db")
 
 # Database connection
 def get_db_connection():
@@ -166,7 +171,7 @@ def reschedule_appointment(appointment_id):
     conn.close()
     return jsonify({"status": "success", "message": "Appointment rescheduled successfully!"})
 
-if __name__ == '__main__': 
+# if __name__ == '__main__': 
     # vercel 
     init_db()
-    app.run(debug=True)   
+    # app.run(debug=True)   
